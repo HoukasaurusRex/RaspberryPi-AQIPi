@@ -24,7 +24,7 @@ while True:
     # returns data in units of tens of grams per metre cubed and we 
     # want the result in that format aio.send is used to push data to Adafruit IO
     pm_twofive = int.from_bytes(b''.join(data[2:4]), byteorder='little') / 10
-    aio.send(f'{CITY}_twofive', pm_twofive)
+    aio.send(f'{CITY}-twofive', pm_twofive)
     pm_ten = int.from_bytes(b''.join(data[4:6]), byteorder='little') / 10
-    aio.send(f'{CITY}_ten', pm_ten)
+    aio.send(f'{CITY}-ten', pm_ten)
     time.sleep(10)

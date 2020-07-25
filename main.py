@@ -2,6 +2,8 @@ import os, serial, time
 from Adafruit_IO import Client
 from dotenv import load_dotenv
 
+print('Starting AQI Monitor script')
+
 load_dotenv()
 AIO_USERNAME = os.getenv("AIO_USERNAME")
 AIO_KEY = os.getenv("AIO_KEY")

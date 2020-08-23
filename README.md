@@ -26,7 +26,7 @@ export CITY='beijing'
 
 ```sh
 pip3 install -r requirements.txt
-pip3 run main.py
+python3 main.py
 ```
 
 ### Installing Locally
@@ -46,6 +46,7 @@ and add
 
 ```sh
 @reboot python3 /home/pi/main.py
+# TODO logs
 ```
 
 ## Safe levels

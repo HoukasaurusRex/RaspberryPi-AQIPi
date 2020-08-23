@@ -45,8 +45,11 @@ crontab -e
 and add
 
 ```sh
-@reboot python3 /home/pi/main.py
-# TODO logs
+# set path to python deps and run script on reboot
+@reboot PYTHONPATH=/usr/lib/python3/dist-packages python3 /home/pi/RaspberryPiAQIPi/main.py &
+
+# write logs to logs/aqipi.log
+* * * * * /home/pi/RaspberryPi-AQIPi/main.py >> /home/pi/logs/aqipi.log 2>&1
 ```
 
 ## Safe levels

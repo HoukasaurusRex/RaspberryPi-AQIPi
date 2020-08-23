@@ -1,3 +1,5 @@
+#!/usr/bin/env/python3
+
 import os, time
 from serial import Serial
 from statistics import median

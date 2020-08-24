@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
-import os, time
-from serial import Serial
+from os import getenv
+from time import sleep
+from datetime import datetime
 from statistics import median
-from Adafruit_IO import Client
 from dotenv import load_dotenv
+from serial import Serial
+from Adafruit_IO import Client
 
-print('Starting AQI Monitor script')
+print(datetime.utcnow(), 'Starting AQI Monitor script')
 
 load_dotenv()
-AIO_USERNAME = os.getenv("AIO_USERNAME")
-AIO_KEY = os.getenv("AIO_KEY")
-CITY = os.getenv('CITY')
+AIO_USERNAME = getenv("AIO_USERNAME")
+AIO_KEY = getenv("AIO_KEY")
+CITY = getenv('CITY')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
 ser = Serial('/dev/ttyUSB0')
@@ -61,7 +63,7 @@ def read_data():
     pm_ten = int.from_bytes(b''.join(data[4:6]), byteorder='little') / 10
     pm_ten_data.append(pm_ten)
     readings += 1
-    time.sleep(1)
+    sleep(1)
   
   pm_twofive_aqi = calc_aqi('pm_twofive', median(pm_twofive_data))
   send_data('twofive', int(round(pm_twofive_aqi)))
@@ -72,4 +74,4 @@ while True:
   try:
     read_data()
   except ValueError as error:
-    print(error)
+    print(datetime.utcnow(), error)

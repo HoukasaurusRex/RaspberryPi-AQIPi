@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
-import serial
 from os import getenv
 from time import sleep
 from datetime import datetime
 from statistics import median
 from dotenv import load_dotenv
+from serial import Serial, serialutil
 from Adafruit_IO import Client
 
 print(datetime.utcnow(), 'Starting AQI Monitor script')
@@ -16,8 +16,8 @@ AIO_KEY = getenv("AIO_KEY")
 CITY = getenv('CITY')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
-ser = serial.Serial('/dev/ttyUSB0')
-# ser = Serial('/dev/cu.usbserial-1410') # Mac serial port
+# ser = Serial('/dev/ttyUSB0')
+ser = Serial('/dev/cu.usbserial-1420') # Mac serial port
 
 
 def find_bp(bp_name, data):
@@ -29,8 +29,8 @@ def find_bp(bp_name, data):
   high = breakpoints[bp_index]
   while high < data:
     bp_index += 1
-    if high >= len(breakpoints) and high < data:
-      raise ValueError(f'Measured value in {bp_name} exceeded index range. Expected value not to exceed {high}, but received {data}') 
+    if bp_index >= len(breakpoints) and high < data:
+      raise ValueError(f'Measured value in {bp_name} exceeded index range. Expected value not to exceed {high}, but received {data}. This is most likely an issue with the connected sensor, unless you\'re having a very bad AQI day') 
     high = breakpoints[bp_index]
 
   return [breakpoints[bp_index - 1], breakpoints[bp_index], aqi_bp[bp_index - 1], aqi_bp[bp_index]]
@@ -52,7 +52,7 @@ def read_data():
   pm_twofive_data = []
   pm_ten_data = []
   readings = 0
-  while readings < 10:
+  while readings < 11:
     data = []
     for index in range(0, 10):
       datum = ser.read()
@@ -75,5 +75,5 @@ while True:
     read_data()
   except ValueError as error:
     print(datetime.utcnow(), error)
-  except serial.serialutil.SerialException as serial_error:
+  except serialutil.SerialException as serial_error:
     print(datetime.utcnow(), serial_error)

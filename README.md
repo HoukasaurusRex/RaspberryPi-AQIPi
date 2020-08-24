@@ -52,6 +52,12 @@ and add
 * * * * * /home/pi/RaspberryPi-AQIPi/main.py >> /home/pi/logs/aqipi.log 2>&1
 ```
 
+### Make it Executable
+
+```sh
+chmod u+x /home/pi/RaspberryPi-AQIPi/main.py
+```
+
 ## Safe levels
 
 Once you’re monitoring your PM2.5 data, what should you look out for? The World Health Organisation air quality guideline stipulates that PM2.5 not exceed 10 µg/m3 annual mean, or 25 µg/m3 24-hour mean; and that PM10 not exceed 20 µg/m3 annual mean, or 50 µg/m3 24-hour mean. However, even these might not be safe. In 2013, a large survey published in The Lancet “found a 7% increase in mortality with each 5 micrograms per cubic metre increase in particulate matter with a diameter of 2.5 micrometres (PM2.5).”

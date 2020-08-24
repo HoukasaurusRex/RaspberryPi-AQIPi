@@ -27,6 +27,8 @@ def find_bp(bp_name, data):
   high = breakpoints[bp_index]
   while high < data:
     bp_index += 1
+    if high >= len(breakpoints) & high < data:
+      raise ValueError(f'Measured value in {bp_name} exceeded index range. Expected value not to exceed {high}, but received {data}') 
     high = breakpoints[bp_index]
 
   return [breakpoints[bp_index - 1], breakpoints[bp_index], aqi_bp[bp_index - 1], aqi_bp[bp_index]]
@@ -65,6 +67,9 @@ def read_data():
   send_data('twofive', int(round(pm_twofive_aqi)))
   pm_ten_aqi = calc_aqi('pm_ten', median(pm_ten_data))
   send_data('ten', int(round(pm_ten_aqi)))
-  read_data()
 
-read_data()
+while True:
+  try:
+    read_data()
+  except ValueError as error:
+    print(error)

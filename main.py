@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+import serial
 from os import getenv
 from time import sleep
 from datetime import datetime
 from statistics import median
 from dotenv import load_dotenv
-from serial import Serial, serialutil
 from Adafruit_IO import Client
 
 print(datetime.utcnow(), 'Starting AQI Monitor script')
@@ -16,7 +16,7 @@ AIO_KEY = getenv("AIO_KEY")
 CITY = getenv('CITY')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
-ser = Serial('/dev/ttyUSB0')
+ser = serial.Serial('/dev/ttyUSB0')
 # ser = Serial('/dev/cu.usbserial-1410') # Mac serial port
 
 
@@ -75,5 +75,5 @@ while True:
     read_data()
   except ValueError as error:
     print(datetime.utcnow(), error)
-  except serialutil.SerialException as serial_error:
+  except serial.serialutil.SerialException as serial_error:
     print(datetime.utcnow(), serial_error)

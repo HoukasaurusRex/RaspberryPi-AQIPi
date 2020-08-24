@@ -27,7 +27,7 @@ def find_bp(bp_name, data):
   high = breakpoints[bp_index]
   while high < data:
     bp_index += 1
-    if high >= len(breakpoints) & high < data:
+    if high >= len(breakpoints) and high < data:
       raise ValueError(f'Measured value in {bp_name} exceeded index range. Expected value not to exceed {high}, but received {data}') 
     high = breakpoints[bp_index]
 

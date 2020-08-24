@@ -5,7 +5,7 @@ from time import sleep
 from datetime import datetime
 from statistics import median
 from dotenv import load_dotenv
-from serial import Serial
+from serial import Serial, serialutil
 from Adafruit_IO import Client
 
 print(datetime.utcnow(), 'Starting AQI Monitor script')
@@ -75,3 +75,5 @@ while True:
     read_data()
   except ValueError as error:
     print(datetime.utcnow(), error)
+  except serialutil.SerialException as serial_error:
+    print(datetime.utcnow(), serial_error)

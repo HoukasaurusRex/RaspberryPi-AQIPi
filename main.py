@@ -17,7 +17,7 @@ CITY = getenv('CITY')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
 ser = Serial('/dev/ttyUSB0')
-# ser = Serial('/dev/cu.usbserial-1420') # Mac serial port
+# ser = Serial('/dev/cu.usbserial-1410') # Mac serial port `ls -lha /dev/cu.usbserial-*`
 
 
 def find_bp(bp_name, data):
@@ -77,3 +77,5 @@ while True:
     print(datetime.utcnow(), error)
   except serialutil.SerialException as serial_error:
     print(datetime.utcnow(), serial_error)
+  finally:
+    sleep(1)

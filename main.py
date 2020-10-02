@@ -7,8 +7,7 @@ from statistics import median
 from dotenv import load_dotenv
 from serial import Serial, serialutil
 from Adafruit_IO import Client
-
-print(datetime.utcnow(), 'Starting AQI Monitor script')
+import requests
 
 load_dotenv()
 AIO_USERNAME = getenv("AIO_USERNAME")
@@ -17,8 +16,8 @@ CITY = getenv('CITY')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
 ser = Serial('/dev/ttyUSB0')
-# ser = Serial('/dev/cu.usbserial-1410') # Mac serial port `ls -lha /dev/cu.usbserial-*`
-
+# ser = Serial('/dev/cu.usbserial-1420') # Mac serial port `ls -lha /dev/cu.usbserial-*`
+error_count = 0
 
 def find_bp(bp_name, data):
   aqi_bp = [0, 50, 100, 150, 200, 300, 400, 500]
@@ -43,7 +42,7 @@ def calc_aqi(name, data):
   I_low = bp[2]
   I_high = bp[3]
   I = ((I_high - I_low) / (C_high - C_low)) * (C - C_low) + I_low
-  return I
+  return int(round(I))
 
 def send_data(name, data):
   aio.send(f'{CITY}-{name}', data)
@@ -66,16 +65,45 @@ def read_data():
     sleep(1)
   
   pm_twofive_aqi = calc_aqi('pm_twofive', median(pm_twofive_data))
-  send_data('twofive', int(round(pm_twofive_aqi)))
+  send_data('twofive', pm_twofive_aqi)
   pm_ten_aqi = calc_aqi('pm_ten', median(pm_ten_data))
-  send_data('ten', int(round(pm_ten_aqi)))
+  send_data('ten', pm_ten_aqi)
+  return [pm_twofive_aqi, pm_ten_aqi]
 
-while True:
-  try:
-    read_data()
-  except ValueError as error:
-    print(datetime.utcnow(), error)
-  except serialutil.SerialException as serial_error:
-    print(datetime.utcnow(), serial_error)
-  finally:
-    sleep(1)
+def retry_connection(timeout):
+  ser.close()
+  sleep(timeout)
+  ser.open()
+
+def handle_error(error):
+  print(datetime.utcnow(), error)
+  global error_count
+  if error_count > 5:
+    retry_connection(60)
+    return
+  elif error_count > 10:
+    raise error
+  error_count += 1
+  retry_connection(1)
+  
+
+def run():
+  print(datetime.utcnow(), 'Starting AQI Monitor script')
+  while True:
+    try:
+      read_data()
+      error_count = 0
+    except ValueError as value_error:
+      handle_error(value_error)
+    except serialutil.SerialException as serial_error:
+      handle_error(serial_error)
+    except requests.exceptions.SSLError as ssl_error:
+      handle_error(ssl_error)
+    finally:
+      sleep(1)
+
+try:
+  run()
+except Exception as error:
+  print(datetime.utcnow(), error)
+  raise error

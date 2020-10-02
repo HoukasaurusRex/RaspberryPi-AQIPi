@@ -8,6 +8,7 @@ Collects air quality data from the SDS011 sensor and pushes it to Adafruit IO
 - Raspberry Pi (Configured with Raspbian or similar Linux-based OS)
 - Python3
 - AdafruitIO account (Or similar dashboard to push and monitor results)
+- https://www.raspberrypi.org/documentation/configuration/uart.md
 
 ## Getting Started
 

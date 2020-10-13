@@ -92,13 +92,14 @@ def run():
   while True:
     try:
       read_data()
-      error_count = 0
     except ValueError as value_error:
       handle_error(value_error)
     except serialutil.SerialException as serial_error:
       handle_error(serial_error)
     except requests.exceptions.SSLError as ssl_error:
       handle_error(ssl_error)
+    except requests.exceptions.ProxyError as proxy_error:
+      handle_error(proxy_error)
     finally:
       sleep(1)
 

@@ -8,13 +8,17 @@ from dotenv import load_dotenv
 from serial import Serial, serialutil
 from Adafruit_IO import Client
 import requests
+import random
 
 load_dotenv()
-AIO_USERNAME = getenv("AIO_USERNAME")
-AIO_KEY = getenv("AIO_KEY")
+AIO_USERNAME = getenv('AIO_USERNAME')
+AIO_KEY = getenv('AIO_KEY')
 CITY = getenv('CITY')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
+error_count = 0
+retry_count = getenv('RETRY_COUNT') or 15
+
 try:
   ser = Serial('/dev/ttyUSB0')
   print('Reading from /dev/ttyUSB0')
@@ -24,7 +28,6 @@ except serialutil.SerialException as serial_error:
 except Exception as error:
   print(datetime.utcnow(), error)
   raise error
-error_count = 0
 
 def find_bp(bp_name, data):
   aqi_bp = [0, 50, 100, 150, 200, 300, 400, 500]
@@ -82,17 +85,17 @@ def retry_connection(timeout):
   sleep(timeout)
   ser.open()
 
+def exponential_backoff(n):
+  return (2 ** n) + (random.randint(0, 1000) / 1000)
+
 def handle_error(error):
-  print(datetime.utcnow(), error)
   global error_count
-  if error_count > 5:
-    retry_connection(60)
-    return
-  elif error_count > 10:
+  if error_count > retry_count:
     raise error
   error_count += 1
-  retry_connection(1)
-  
+  backoff_time = exponential_backoff(error_count)
+  print(datetime.utcnow(), f'{error} \n Retrying in {backoff_time} seconds...')
+  retry_connection(backoff_time)
 
 def run():
   print(datetime.utcnow(), 'Starting AQI Monitor script')

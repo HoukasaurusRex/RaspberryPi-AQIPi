@@ -18,16 +18,33 @@ CITY = getenv('CITY')
 aio = Client(AIO_USERNAME, AIO_KEY)
 error_count = 0
 retry_count = getenv('RETRY_COUNT') or 15
+ser = Serial()
+usb_ports = [
+  '/dev/ttyUSB0',
+  '/dev/cu.usbserial-1410', # Mac serial port `ls -lha /dev/cu.usbserial-*`
+  '/dev/cu.usbserial-1420',
+  '/dev/cu.usbserial-1430',
+  '/dev/cu.usbserial-1440'
+]
 
-try:
-  ser = Serial('/dev/ttyUSB0')
-  print('Reading from /dev/ttyUSB0')
-except serialutil.SerialException as serial_error:
-  ser = Serial('/dev/cu.usbserial-1420') # Mac serial port `ls -lha /dev/cu.usbserial-*`
-  print('Reading from /dev/cu.usbserial-1420')
-except Exception as error:
-  print(datetime.utcnow(), error)
-  raise error
+def get_time():
+  format = '%Y-%m-%d %H:%M:%S'
+  now = datetime.now()
+  return now.strftime(format)
+
+for i, port in enumerate(usb_ports):
+  try:
+    ser = Serial(port)
+    print(get_time(), f'Reading from {port}')
+    break
+  except serialutil.SerialException as serial_error:
+    if i >= len(usb_ports):
+      print(get_time(), serial_error)
+      raise serial_error
+    continue
+  except Exception as error:
+    print(get_time(), error)
+    raise error
 
 def find_bp(bp_name, data):
   aqi_bp = [0, 50, 100, 150, 200, 300, 400, 500]
@@ -94,14 +111,17 @@ def handle_error(error):
     raise error
   error_count += 1
   backoff_time = exponential_backoff(error_count)
-  print(datetime.utcnow(), f'{error} \n Retrying in {backoff_time} seconds...')
+  print(get_time(), f'{error} \n Retrying in {backoff_time} seconds...')
   retry_connection(backoff_time)
+  print(get_time(), 'Reconnected')
 
 def run():
-  print(datetime.utcnow(), 'Starting AQI Monitor script')
+  print(get_time(), 'Starting AQI Monitor script')
   while True:
     try:
+      global error_count
       read_data()
+      error_count = 0
     except ValueError as value_error:
       handle_error(value_error)
     except serialutil.SerialException as serial_error:
@@ -116,5 +136,5 @@ def run():
 try:
   run()
 except Exception as error:
-  print(datetime.utcnow(), error)
+  print(get_time(), error)
   raise error

@@ -18,9 +18,11 @@ Once the code is running fine, add the script to your `crontab`.
 ### Setting Env Vars
 
 ```sh
-export AIO_USERNAME='MyAIOUsername'
-export AIO_KEY='MyAIOActiveKey'
-export CITY='beijing'
+echo "
+AIO_USERNAME='MyAIOUsername'
+AIO_KEY='MyAIOActiveKey'
+CITY='beijing'
+" > /home/pi/RaspberryPi-AQIPi/.env
 ```
 
 ### Installing Globally

@@ -13,6 +13,7 @@ load_dotenv()
 AIO_USERNAME = getenv('AIO_USERNAME')
 AIO_KEY = getenv('AIO_KEY')
 CITY = getenv('CITY')
+AIO_LOGS = getenv('AIO_LOGS')
 
 aio = Client(AIO_USERNAME, AIO_KEY)
 error_count = 0
@@ -31,18 +32,29 @@ def get_time():
   now = datetime.now()
   return now.strftime(format)
 
+def log(msg):
+  msg_payload = f'{get_time()}: {msg}'
+  if AIO_LOGS:
+    try:
+      aio.send(AIO_LOGS, msg_payload)
+    except Exception as error:
+      print('Error submitting logs to aio: ', error)
+      print('Original message: ', msg_payload)
+  else:
+    print(msg_payload)
+
 for i, port in enumerate(usb_ports):
   try:
     ser = Serial(port)
-    print(get_time(), f'Reading from {port}')
+    log(get_time(), f'Reading from {port}')
     break
   except serialutil.SerialException as serial_error:
     if i >= len(usb_ports):
-      print(get_time(), serial_error)
+      log(get_time(), serial_error)
       raise serial_error
     continue
   except Exception as error:
-    print(get_time(), error)
+    log(get_time(), error)
     raise error
 
 def find_bp(bp_name, data):
@@ -110,12 +122,12 @@ def handle_error(error):
     raise error
   error_count += 1
   backoff_time = exponential_backoff(error_count)
-  print(get_time(), f'{error} \n Retrying in {backoff_time} seconds...')
+  log(get_time(), f'{error} \n Retrying in {backoff_time} seconds...')
   retry_connection(backoff_time)
-  print(get_time(), 'Reconnected')
+  log(get_time(), 'Reconnected')
 
 def run():
-  print(get_time(), 'Starting AQI Monitor script')
+  log(get_time(), 'Starting AQI Monitor script')
   while True:
     try:
       global error_count
@@ -129,5 +141,5 @@ def run():
 try:
   run()
 except Exception as error:
-  print(get_time(), error)
+  log(get_time(), error)
   raise error

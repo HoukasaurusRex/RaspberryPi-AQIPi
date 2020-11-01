@@ -46,15 +46,15 @@ def log(msg):
 for i, port in enumerate(usb_ports):
   try:
     ser = Serial(port)
-    log(get_time(), f'Reading from {port}')
+    log(f'Reading from {port}')
     break
   except serialutil.SerialException as serial_error:
     if i >= len(usb_ports):
-      log(get_time(), serial_error)
+      log(serial_error)
       raise serial_error
     continue
   except Exception as error:
-    log(get_time(), error)
+    log(error)
     raise error
 
 def find_bp(bp_name, data):
@@ -122,12 +122,12 @@ def handle_error(error):
     raise error
   error_count += 1
   backoff_time = exponential_backoff(error_count)
-  log(get_time(), f'{error} \n Retrying in {backoff_time} seconds...')
+  log(f'{error} \n Retrying in {backoff_time} seconds...')
   retry_connection(backoff_time)
-  log(get_time(), 'Reconnected')
+  log('Reconnected')
 
 def run():
-  log(get_time(), 'Starting AQI Monitor script')
+  log('Starting AQI Monitor script')
   while True:
     try:
       global error_count
@@ -141,5 +141,5 @@ def run():
 try:
   run()
 except Exception as error:
-  log(get_time(), error)
+  log(error)
   raise error

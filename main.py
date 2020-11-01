@@ -7,7 +7,6 @@ from statistics import median
 from dotenv import load_dotenv
 from serial import Serial, serialutil
 from Adafruit_IO import Client
-import requests
 import random
 
 load_dotenv()

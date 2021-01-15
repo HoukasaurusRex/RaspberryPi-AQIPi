@@ -34,14 +34,13 @@ def get_time():
 
 def log(msg):
   msg_payload = f'{get_time()}: {msg}'
+  print(msg_payload)
   if AIO_LOGS:
     try:
       aio.send(AIO_LOGS, msg_payload)
     except Exception as error:
       print('Error submitting logs to aio: ', error)
       print('Original message: ', msg_payload)
-  else:
-    print(msg_payload)
 
 for i, port in enumerate(usb_ports):
   try:
